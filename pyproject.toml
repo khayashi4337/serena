@@ -8,10 +8,11 @@ version = "0.1.4"
 description = ""
 authors = [{ name = "Oraios AI", email = "info@oraios-ai.de" }]
 readme = "README.md"
-requires-python = ">=3.11, <3.12"
+requires-python = ">=3.11, <3.13"
 classifiers = [
   "License :: OSI Approved :: MIT License",
   "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
 ]
 dependencies = [
   "requests>=2.32.3,<3",
@@ -75,7 +76,7 @@ packages = ["src/serena", "src/interprompt", "src/solidlsp"]
 
 [tool.black]
 line-length = 140
-target-version = ["py311"]
+target-version = ["py311", "py312"]
 exclude = '''
 /(
     src/solidlsp/language_servers/.*/static|src/multilspy
@@ -123,7 +124,7 @@ _mypy = "mypy src/serena"
 type-check = ["_mypy"]
 
 [tool.ruff]
-target-version = "py311"
+target-version = ["py311", "py312"]
 line-length = 140
 exclude = ["src/solidlsp/language_servers/**/static", "src/multilspy"]
 

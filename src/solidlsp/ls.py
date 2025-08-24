@@ -253,6 +253,11 @@ class SolidLanguageServer(ABC):
 
             ls = LuaLanguageServer(config, logger, repository_root_path, solidlsp_settings=solidlsp_settings)
 
+        elif config.code_language == Language.MQL5:
+            from solidlsp.language_servers.mql5_server import MQL5Server
+
+            ls = MQL5Server(config, logger, repository_root_path, solidlsp_settings=solidlsp_settings)
+
         else:
             logger.log(f"Language {config.code_language} is not supported", logging.ERROR)
             raise SolidLSPException(f"Language {config.code_language} is not supported")

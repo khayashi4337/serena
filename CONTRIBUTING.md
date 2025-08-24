@@ -1,37 +1,38 @@
-# Contributing to Serena
+# Serenaへの貢献
 
-Serena is under active development. We are just discovering what it can do and where the limitations lie.
+Serenaは活発に開発が進められています。私たちは、このツールで何ができるのか、そしてどこに限界があるのかをまだ探っていく段階です。
 
-Feel free to share your learnings by opening new issues, feature requests and extensions.
+新しいIssueの作成、機能リクエスト、拡張機能の提案などを通じて、皆さんの学びをぜひ共有してください。
 
-## Developer Environment Setup
+## 開発環境のセットアップ
 
-You can have a local setup via `uv` or a docker interpreter-based setup. 
-The repository is also configured to seamlessly work within a GitHub Codespace. See the instructions
-for the various setup scenarios below.
+開発環境は、`uv`を使用したローカルセットアップ、またはDockerベースのセットアップが可能です。
+また、このリポジトリはGitHub Codespace上でもシームレスに動作するように設定されています。以下に、それぞれのセットアップシナリオの手順を示します。
 
-Independently of how the setup was done, the virtual environment can be 
-created and activated via `uv` (see below), and the various tasks like formatting, testing, and documentation building
-can be executed using `poe`. For example, `poe format` will format the code, including the 
-notebooks. Just run `poe` to see the available commands.
+どの方法でセットアップした場合でも、`uv`を介して仮想環境を作成・有効化でき（下記参照）、フォーマット、テスト、ドキュメント構築などの様々なタスクは`poe`を使って実行できます。例えば、`poe format`を実行すると、ノートブックを含むコード全体がフォーマットされます。利用可能なコマンド一覧は`poe`とだけ実行して確認してください。
 
-### Python (uv) setup
+### Python (`uv`) でのセットアップ
 
-You can install a virtual environment with the required as follows
+以下の手順で、必要なパッケージを含む仮想環境をインストールできます。
 
-1. Create a new virtual environment: `uv venv`
-2. Activate the environment:
-    * On Linux/Unix/macOS or Windows with Git Bash: `source .venv/bin/activate`
-    * On Windows outside of Git Bash: `.venv\Scripts\activate.bat` (in cmd/ps) or `source .venv/Scripts/activate` (in git-bash) 
-3. Install the required packages with all extras: `uv pip install --all-extras -r pyproject.toml -e .`
+1.  新しい仮想環境を作成します: `uv venv`
+2.  環境を有効化します:
+    *   Linux/Unix/macOS または WindowsのGit Bashの場合: `source .venv/bin/activate`
+    *   上記以外のWindows環境の場合: `.venv\Scripts\activate.bat` (cmd/ps) または `source .venv/Scripts/activate` (git-bash)
+3.  すべての追加機能を含む必要なパッケージをインストールします: `uv pip install -e .[all]`
 
-## Running Tools Locally
+    **Windowsでの注意**: 上記コマンドの実行中に `Permission denied` のような権限エラーが発生した場合、代わりに以下のコマンドをお試しください。これにより、ユーザー個別の領域にパッケージがインストールされます。
 
-The Serena tools (and in fact all Serena code) can be executed without an LLM, and also without
-any MCP specifics (though you can use the mcp inspector, if you want).
+    ```shell
+    pip install -e .[all] --user
+    ```
 
-An example script for running tools is provided in [scripts/demo_run_tools.py](scripts/demo_run_tools.py).
+## ツールのローカル実行
 
-## Adding a New Supported Language
+Serenaのツール（実際にはSerenaの全コード）は、LLMなしで実行できます。また、MCP固有の機能も不要です（ただし、必要であればmcpインスペクターを使用することも可能です）。
 
-See the corresponding [memory](.serena/memories/adding_new_language_support_guide.md).
+ツールを実行するためのサンプルスクリプトが [scripts/demo_run_tools.py](scripts/demo_run_tools.py) にあります。
+
+## 新しい対応言語の追加
+
+対応する[メモリ](.serena/memories/adding_new_language_support_guide.md)を参照してください。
