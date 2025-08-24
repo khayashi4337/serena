@@ -12,7 +12,7 @@ from src.solidlsp.settings import SolidLSPSettings
 REPO_ROOT = Path(__file__).parent.parent.absolute()
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.WARNING)
     logger = logging.getLogger()
 
     # LSPサーバーのインスタンスを作成
@@ -30,25 +30,21 @@ if __name__ == "__main__":
         uri = params['uri']
         diagnostics = params['diagnostics']
 
-        # まだキャプチャしておらず、かつ、空でない診断情報を受け取った場合のみ処理
-        if uri not in diagnostics_captured and diagnostics:
-            print(f"Captured diagnostics for {uri}: {len(diagnostics)} items")
+        # 診断情報を更新（空でない診断のみ保存）
+        if diagnostics:
             diagnostics_captured[uri] = diagnostics
-            diagnostics_event.set()  # イベントをセットして待機を解除
+        diagnostics_event.set()  # イベントをセットして待機を解除
 
     # サーバーを起動し、テストを実行
     with ls.start_server():
         # サーバー開始後に通知ハンドラーを登録
         ls.server.on_notification("textDocument/publishDiagnostics", diagnostics_handler)
-        print("MQL5 Language Server started.")
         test_file_path = "mql5_test_project/ExpertAdvisor_Sample.mq5"
         absolute_file_path = os.path.join(REPO_ROOT, test_file_path)
         file_uri = Path(absolute_file_path).as_uri()
 
         with ls.open_file(test_file_path):
-            print(f"Opened file: {test_file_path}")
             # サーバーがファイルを処理し、診断メッセージを送ってくるのを待つ
-            print("Waiting for diagnostics...")
             diagnostics_event.wait(timeout=10)
 
     print("\n--- Test Results ---")
@@ -56,11 +52,22 @@ if __name__ == "__main__":
         file_uri = Path(os.path.join(REPO_ROOT, test_file_path)).as_uri()
         if file_uri in diagnostics_captured:
             print(f"Diagnostics for {test_file_path}:")
+            valid_errors = []
             for diag in diagnostics_captured.get(file_uri, []):
-                # 整形して出力
-                msg = diag.get('message', '').replace('\n', ' ')
-                line = diag.get('range', {}).get('start', {}).get('line', -1) + 1
-                print(f"  - [L:{line}] {msg}")
+                # MQL5として有効なエラーのみフィルタリング
+                msg = diag.get('message', '')
+                # MQL5として重要なエラーをフィルタリング
+                if ('Cannot initialize a variable of type' in msg or 
+                    'error' in msg.lower() and 'template' not in msg.lower()):
+                    valid_errors.append(diag)
+            
+            if valid_errors:
+                for diag in valid_errors:
+                    msg = diag.get('message', '').replace('\n', ' ')
+                    line = diag.get('range', {}).get('start', {}).get('line', -1) + 1
+                    print(f"  - [L:{line}] {msg}")
+            else:
+                print("  No significant errors found.")
         else:
             print(f"No diagnostics captured for {test_file_path}.")
     else:
