@@ -10,6 +10,15 @@
 
 SerenaはコーディングエージェントのためのIDEと考えることができます。これを使えば、エージェントはファイル全体を読んだり、grepのような検索や文字列置換を行って適切なコードを見つけて編集したりする必要がなくなります。代わりに、`find_symbol`、`find_referencing_symbols`、`insert_after_symbol`のようなコード中心のツールを使用できます。
 
+### このフォークについて (About this Fork)
+
+このリポジトリは、[oraios/serena](https://github.com/oraios/serena) のフォークです。オリジナルのSerenaが持つ強力なセマンティックコード分析・編集機能はそのままに、以下の独自の機能拡張を加えています。
+
+*   **MQL5言語のサポート**: MetaTrader 5のカスタムインジケーターやエキスパートアドバイザー開発を強力に支援するため、MQL5言語のセマンティック分析に正式対応しました。
+*   **デュアルライセンス**:
+    *   **AGPL-3.0**: オープンソースプロジェクトでご利用いただけます。
+    *   **商用ライセンス**: MQL5サポート機能を含むSerenaをクローズドソースな商用製品に組み込んで利用するための、[有償ライセンス](COMMERCIAL_LICENSE.md)を提供しています。
+
 ### ユーザーからのフィードバック
 
 ほとんどのユーザーは、非常に高性能なエージェント（Claude Codeなど）内で使用した場合でも、Serenaがコーディングエージェントの結果に強力なプラスの効果をもたらすと報告しています。Serenaはしばしば[ゲームチェンジャー](https://www.reddit.com/r/ClaudeAI/comments/1lfsdll/try_out_serena_mcp_thank_me_later/)、または絶大な[生産性向上](https://www.reddit.com/r/ClaudeCode/comments/1mguoia/absolutely_insane_improvement_of_claude_code)をもたらすものとして説明されています。
