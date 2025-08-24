@@ -22,14 +22,33 @@ class MQL5Server(ClangdLanguageServer):
         logger: LanguageServerLogger,
         repository_root_path: str,
         solidlsp_settings: SolidLSPSettings,
+        enable_debug_logging: bool = True,
     ):
         """
         Creates a MQL5Server instance.
         This class is not meant to be instantiated directly. Use LanguageServer.create() instead.
+        
+        Args:
+            config: Language server configuration
+            logger: Logger instance
+            repository_root_path: Path to the repository root
+            solidlsp_settings: SolidLSP settings
+            enable_debug_logging: Enable detailed logging for debugging (default: True)
         """
         self._setup_mql5_environment(logger, repository_root_path, solidlsp_settings)
 
-        super().__init__(config, logger, repository_root_path, solidlsp_settings)
+        # Clangd用の詳細ログオプションを設定
+        extra_args = []
+        if enable_debug_logging:
+            extra_args.extend([
+                "--log=verbose",  # 詳細ログを有効化
+                "-j=1",          # 並列処理を1に制限（デバッグしやすくするため）
+                "--limit-references=1000",  # 参照数制限を緩和
+                "--limit-results=1000",     # 結果数制限を緩和
+            ])
+            logger.log("MQL5デバッグモード有効: 詳細ログと診断制限の緩和を適用", logging.INFO)
+
+        super().__init__(config, logger, repository_root_path, solidlsp_settings, extra_args)
 
     def _setup_mql5_environment(
         self,
@@ -62,16 +81,20 @@ class MQL5Server(ClangdLanguageServer):
         include_path = os.path.join(mql5_headers_dir, "Include")
         include_path_posix = pathlib.Path(include_path).as_posix()
 
-        # MQL5-specific compiler flags - simplified approach
+        # MQL5-specific compiler flags - enhanced for better error reporting
         flags = [
             f"-I{include_path_posix}",
             "--include=Core/MQL5.mqh",
-            "-std=c++11",  # Back to c++11 for MQL5 compatibility
+            "-std=c++11",  # MQL5 compatibility
             "-xc++",
             "-Wno-write-strings",
             "-Wno-unknown-pragmas",  # Suppress #property warnings
             "-D__MQL5__",  # Define MQL5 environment
             "-Dsinput=int",  # Define sinput as int type
+            "-Dproperty(...)=",  # Define #property macro to be empty
+            "-ferror-limit=50",  # Increase error limit for better diagnostics
+            "-fno-caret-diagnostics",  # Simplify diagnostic output
+            "-Wno-unused-variable",  # Suppress unused variable warnings in MQL5
         ]
 
         flags_content = "\n".join(flags)

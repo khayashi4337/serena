@@ -35,7 +35,7 @@ void OnDeinit(const int reason)
 void OnTick()
   {
 //---
-   string hello = "world" // Missing semicolon
-   int test = 123; // This should NOT show an error anymore
+   string hello = "world"; // Fixed: Added semicolon
+   int test = 123; // This should show no error
   }
 //+------------------------------------------------------------------+

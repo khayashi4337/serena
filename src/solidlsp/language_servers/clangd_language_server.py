@@ -25,17 +25,31 @@ class ClangdLanguageServer(SolidLanguageServer):
     """
 
     def __init__(
-        self, config: LanguageServerConfig, logger: LanguageServerLogger, repository_root_path: str, solidlsp_settings: SolidLSPSettings
+        self, config: LanguageServerConfig, logger: LanguageServerLogger, repository_root_path: str, solidlsp_settings: SolidLSPSettings, extra_server_args: list[str] = None
     ):
         """
         Creates a ClangdLanguageServer instance. This class is not meant to be instantiated directly. Use LanguageServer.create() instead.
+        
+        Args:
+            config: Language server configuration
+            logger: Logger instance
+            repository_root_path: Path to the repository root
+            solidlsp_settings: SolidLSP settings
+            extra_server_args: Additional command line arguments for clangd (e.g., ['--log=verbose', '-j=1'])
         """
         clangd_executable_path = self._setup_runtime_dependencies(logger, config, solidlsp_settings)
+        
+        # コマンド引数の構築 - 追加引数をサポート
+        cmd_args = [clangd_executable_path]
+        if extra_server_args:
+            cmd_args.extend(extra_server_args)
+            logger.log(f"Clangdに追加引数を適用: {extra_server_args}", logging.INFO)
+        
         super().__init__(
             config,
             logger,
             repository_root_path,
-            ProcessLaunchInfo(cmd=clangd_executable_path, cwd=repository_root_path),
+            ProcessLaunchInfo(cmd=cmd_args, cwd=repository_root_path),
             "cpp",
             solidlsp_settings,
         )
