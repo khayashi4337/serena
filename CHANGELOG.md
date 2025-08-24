@@ -2,6 +2,7 @@
 Status of the `main` branch. Changes prior to the next official version change will appear here.
 
 * Language support:
+  * **Add support for MQL5**: Added support for MQL5 by using `clangd` as a backend. It automatically clones the necessary headers and configures `compile_flags.txt`.
   * **Add support for Zig** via ZLS (cross-file references may not fully work on Windows)
   * **Add support for Lua** via lua-language-server
   * **Add support for Nix** requires nixd installation (Windows not supported)
