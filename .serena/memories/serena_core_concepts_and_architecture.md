@@ -1,175 +1,175 @@
-# Serena Core Concepts and Architecture
+# Serenaのコアコンセプトとアーキテクチャ
 
-## High-Level Architecture
+## ハイレベルアーキテクチャ
 
-Serena is built around a dual-layer architecture:
+Serenaは、2層のアーキテクチャで構築されています。
 
-1. **SerenaAgent** - The main orchestrator that manages projects, tools, and user interactions
-2. **SolidLanguageServer** - A unified wrapper around Language Server Protocol (LSP) implementations
+1.  **SerenaAgent** - プロジェクト、ツール、ユーザーとの対話を管理する主要なオーケストレーター
+2.  **SolidLanguageServer** - Language Server Protocol (LSP) の実装を統一的にラップするもの
 
-## Core Components
+## コアコンポーネント
 
 ### 1. SerenaAgent (`src/serena/agent.py`)
 
-The central coordinator that:
-- Manages active projects and their configurations
-- Coordinates between different tools and contexts
-- Handles language server lifecycle
-- Manages memory persistence
-- Provides MCP (Model Context Protocol) server interface
+以下を行う中央コーディネーターです。
+-   アクティブなプロジェクトとその設定を管理
+-   異なるツールとコンテキスト間を調整
+-   言語サーバーのライフサイクルを処理
+-   メモリの永続化を管理
+-   MCP (Model Context Protocol) サーバーインターフェースを提供
 
-Key responsibilities:
-- **Project Management** - Activating, switching between projects
-- **Tool Registry** - Loading and managing available tools based on context/mode
-- **Language Server Integration** - Starting/stopping language servers per project
-- **Memory Management** - Persistent storage of project knowledge
-- **Task Execution** - Coordinating complex multi-step operations
+主な責務:
+-   **プロジェクト管理** - プロジェクトのアクティベート、切り替え
+-   **ツールレジストリ** - コンテキスト/モードに基づいて利用可能なツールを読み込み、管理
+-   **言語サーバー統合** - プロジェクトごとに言語サーバーを起動/停止
+-   **メモリ管理** - プロジェクト知識の永続的ストレージ
+-   **タスク実行** - 複雑な複数ステップの操作を調整
 
 ### 2. SolidLanguageServer (`src/solidlsp/ls.py`)
 
-A unified abstraction over multiple language servers that provides:
-- **Language-agnostic interface** for symbol operations
-- **Caching layer** for performance optimization
-- **Error handling and recovery** for unreliable language servers
-- **Uniform API** regardless of underlying LSP implementation
+複数の言語サーバーを統一的に抽象化し、以下を提供します。
+-   シンボル操作のための**言語に依存しないインターフェース**
+-   パフォーマンス最適化のための**キャッシング層**
+-   信頼性の低い言語サーバーのための**エラーハンドリングと回復**
+-   基盤となるLSP実装に関わらない**統一API**
 
-Core capabilities:
-- Symbol discovery and navigation
-- Code completion and hover information
-- Find references and definitions
-- Document and workspace symbol search
-- File watching and change notifications
+主要な機能:
+-   シンボルの発見とナビゲーション
+-   コード補完とホバー情報
+-   参照と定義の検索
+-   ドキュメントとワークスペースのシンボル検索
+-   ファイルの監視と変更通知
 
-### 3. Tool System (`src/serena/tools/`)
+### 3. ツールシステム (`src/serena/tools/`)
 
-Modular tool architecture with several categories:
+いくつかのカテゴリを持つモジュラーなツールアーキテクチャです。
 
-#### File Tools (`file_tools.py`)
-- File system operations (read, write, list directories)
-- Text search and pattern matching
-- Regex-based replacements
+#### ファイルツール (`file_tools.py`)
+-   ファイルシステム操作 (読み取り、書き込み、ディレクトリ一覧)
+-   テキスト検索とパターンマッチング
+-   正規表現ベースの置換
 
-#### Symbol Tools (`symbol_tools.py`)  
-- Language-aware symbol finding and navigation
-- Symbol body replacement and insertion
-- Reference finding across codebase
+#### シンボルツール (`symbol_tools.py`)
+-   言語を意識したシンボルの検索とナビゲーション
+-   シンボル本体の置換と挿入
+-   コードベース全体での参照検索
 
-#### Memory Tools (`memory_tools.py`)
-- Project knowledge persistence
-- Memory retrieval and management
-- Onboarding information storage
+#### メモリツール (`memory_tools.py`)
+-   プロジェクト知識の永続化
+-   メモリの取得と管理
+-   オンボーディング情報の保存
 
-#### Configuration Tools (`config_tools.py`)
-- Project activation and switching
-- Mode and context management
-- Tool inclusion/exclusion
+#### 設定ツール (`config_tools.py`)
+-   プロジェクトのアクティベートと切り替え
+-   モードとコンテキストの管理
+-   ツールの包含/除外
 
-### 4. Configuration System (`src/serena/config/`)
+## 設定システム (`src/serena/config/`)
 
-Multi-layered configuration supporting:
-- **Contexts** - Define available tools and their behavior
-- **Modes** - Specify operational patterns (interactive, editing, etc.)
-- **Projects** - Per-project settings and language server configs
-- **Tool Sets** - Grouped tool collections for different use cases
+以下をサポートする多層的な設定です。
+-   **コンテキスト** - 利用可能なツールとその振る舞いを定義
+-   **モード** - 操作パターン (インタラクティブ、編集など) を指定
+-   **プロジェクト** - プロジェクトごとの設定と言語サーバー設定
+-   **ツールセット** - さまざまなユースケースのためのグループ化されたツールのコレクション
 
-## Language Server Integration
+## 言語サーバー統合
 
-### Language Support Model
+### 言語サポートモデル
 
-Each supported language has:
-1. **Language Server Implementation** (`src/solidlsp/language_servers/`)
-2. **Runtime Dependencies** - Managed downloads of language servers
-3. **Test Repository** (`test/resources/repos/<language>/`)
-4. **Test Suite** (`test/solidlsp/<language>/`)
+サポートされている各言語には、以下があります。
+1.  **言語サーバー実装** (`src/solidlsp/language_servers/`)
+2.  **ランタイム依存関係** - 言語サーバーのダウンロードを管理
+3.  **テストリポジトリ** (`test/resources/repos/<language>/`)
+4.  **テストスイート** (`test/solidlsp/<language>/`)
 
-### Language Server Lifecycle
+### 言語サーバーのライフサイクル
 
-1. **Discovery** - Find language servers or download them automatically
-2. **Initialization** - Start server process and perform LSP handshake
-3. **Project Setup** - Open workspace and configure language-specific settings
-4. **Operation** - Handle requests/responses with caching and error recovery
-5. **Shutdown** - Clean shutdown of server processes
+1.  **発見** - 言語サーバーを検索するか、自動的にダウンロード
+2.  **初期化** - サーバープロセスを開始し、LSPハンドシェイクを実行
+3.  **プロジェクト設定** - ワークスペースを開き、言語固有の設定を構成
+4.  **操作** - キャッシングとエラー回復を伴うリクエスト/レスポンスを処理
+5.  **シャットダウン** - サーバープロセスをクリーンにシャットダウン
 
-### Supported Languages
+### サポートされている言語
 
-Current language support includes:
-- **C#** - Microsoft.CodeAnalysis.LanguageServer (.NET 9)
-- **Python** - Pyright or Jedi
-- **TypeScript/JavaScript** - TypeScript Language Server
-- **Rust** - rust-analyzer
-- **Go** - gopls
-- **Java** - Eclipse JDT Language Server
-- **Kotlin** - Kotlin Language Server
-- **PHP** - Intelephense
-- **Ruby** - Solargraph
-- **Clojure** - clojure-lsp
-- **Elixir** - ElixirLS
-- **Dart** - Dart Language Server
-- **C/C++** - clangd
-- **Terraform** - terraform-ls
+現在サポートされている言語は以下の通りです。
+-   **C#** - Microsoft.CodeAnalysis.LanguageServer (.NET 9)
+-   **Python** - Pyright または Jedi
+-   **TypeScript/JavaScript** - TypeScript Language Server
+-   **Rust** - rust-analyzer
+-   **Go** - gopls
+-   **Java** - Eclipse JDT Language Server
+-   **Kotlin** - Kotlin Language Server
+-   **PHP** - Intelephense
+-   **Ruby** - Solargraph
+-   **Clojure** - clojure-lsp
+-   **Elixir** - ElixirLS
+-   **Dart** - Dart Language Server
+-   **C/C++** - clangd
+-   **Terraform** - terraform-ls
 
-## Memory and Knowledge Management
+## メモリと知識管理
 
-### Memory System
-- **Markdown-based storage** in `.serena/memories/` directory
-- **Contextual retrieval** - memories loaded based on relevance
-- **Project-specific** knowledge persistence
-- **Onboarding support** - guided setup for new projects
+### メモリシステム
+-   `.serena/memories/` ディレクトリへの**Markdownベースのストレージ**
+-   **文脈に応じた取得** - 関連性に基づいてメモリを読み込み
+-   **プロジェクト固有**の知識の永続化
+-   **オンボーディングサポート** - 新規プロジェクトのガイド付きセットアップ
 
-### Knowledge Categories
-- **Project Structure** - Directory layouts, build systems
-- **Architecture Patterns** - How the codebase is organized
-- **Development Workflows** - Testing, building, deployment
-- **Domain Knowledge** - Business logic and requirements
+### 知識カテゴリ
+-   **プロジェクト構造** - ディレクトリレイアウト、ビルドシステム
+-   **アーキテクチャパターン** - コードベースの構成方法
+-   **開発ワークフロー** - テスト、ビルド、デプロイ
+-   **ドメイン知識** - ビジネスロジックと要件
 
-## MCP Server Interface
+## MCPサーバーインターフェース
 
-Serena exposes its functionality through Model Context Protocol:
-- **Tool Discovery** - AI agents can enumerate available tools
-- **Context-Aware Operations** - Tools behave based on active project/mode
-- **Stateful Sessions** - Maintains project state across interactions
-- **Error Handling** - Graceful degradation when tools fail
+Serenaは、Model Context Protocolを通じてその機能を提供します。
+-   **ツール発見** - AIエージェントが利用可能なツールを列挙可能
+-   **コンテキスト対応操作** - ツールはアクティブなプロジェクト/モードに基づいて動作
+-   **ステートフルセッション** - 対話を通じてプロジェクトの状態を維持
+-   **エラーハンドリング** - ツールが失敗した場合のグレースフルなデグラデーション
 
-## Error Handling and Resilience
+## エラーハンドリングと回復力
 
-### Language Server Reliability
-- **Timeout Management** - Configurable timeouts for LSP requests
-- **Process Recovery** - Automatic restart of crashed language servers
-- **Fallback Behavior** - Graceful degradation when LSP unavailable
-- **Caching Strategy** - Reduces impact of server failures
+### 言語サーバーの信頼性
+-   **タイムアウト管理** - LSPリクエストの構成可能なタイムアウト
+-   **プロセス回復** - クラッシュした言語サーバーの自動再起動
+-   **フォールバック動作** - LSPが利用できない場合のグレースフルなデグラデーション
+-   **キャッシング戦略** - サーバー障害の影響を軽減
 
-### Project Activation Safety
-- **Validation** - Verify project structure before activation
-- **Error Isolation** - Project failures don't affect other projects
-- **Recovery Mechanisms** - Automatic cleanup and retry logic
+### プロジェクトアクティベーションの安全性
+-   **検証** - アクティベート前にプロジェクト構造を検証
+-   **エラー分離** - プロジェクトの失敗が他のプロジェクトに影響を与えない
+-   **回復メカニズム** - 自動クリーンアップと再試行ロジック
 
-## Performance Considerations
+## パフォーマンスに関する考慮事項
 
-### Caching Strategy
-- **Symbol Cache** - In-memory caching of expensive symbol operations
-- **File System Cache** - Reduced disk I/O for repeated operations
-- **Language Server Cache** - Persistent cache across sessions
+### キャッシング戦略
+-   **シンボルキャッシュ** - コストの高いシンボル操作のインメモリキャッシング
+-   **ファイルシステムキャッシュ** - 繰り返し操作でのディスクI/Oを削減
+-   **言語サーバーキャッシュ** - セッションをまたいで永続化されるキャッシュ
 
-### Resource Management
-- **Language Server Pooling** - Reuse servers across projects when possible
-- **Memory Management** - Automatic cleanup of unused resources
-- **Background Operations** - Async operations don't block user interactions
+### リソース管理
+-   **言語サーバープーリング** - 可能な場合、プロジェクト間でサーバーを再利用
+-   **メモリ管理** - 未使用リソースの自動クリーンアップ
+-   **バックグラウンド操作** - 非同期操作がユーザーの対話をブロックしない
 
-## Extension Points
+## 拡張ポイント
 
-### Adding New Languages
-1. Implement language server class in `src/solidlsp/language_servers/`
-2. Add runtime dependencies configuration
-3. Create test repository and test suite
-4. Update language enumeration and configuration
+### 新しい言語の追加
+1.  `src/solidlsp/language_servers/` に言語サーバークラスを実装
+2.  ランタイム依存関係の設定を追加
+3.  テストリポジトリとテストスイートを作成
+4.  言語の列挙と設定を更新
 
-### Adding New Tools
-1. Inherit from `Tool` base class in `tools_base.py`
-2. Implement required methods and parameter validation
-3. Register tool in appropriate tool registry
-4. Add to context/mode configurations as needed
+### 新しいツールの追加
+1.  `tools_base.py` の `Tool` 基底クラスを継承
+2.  必要なメソッドとパラメータ検証を実装
+3.  適切なツールレジストリにツールを登録
+4.  必要に応じてコンテキスト/モード設定に追加
 
-### Custom Contexts and Modes
-- Define new contexts in YAML configuration files
-- Specify tool sets and operational patterns
-- Configure for specific development workflows
+### カスタムコンテキストとモード
+-   YAML設定ファイルで新しいコンテキストを定義
+-   ツールセットと操作パターンを指定
+-   特定の開発ワークフロー用に設定
