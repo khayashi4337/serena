@@ -1,45 +1,45 @@
 import os
 import time
+import logging
+import threading
 from pathlib import Path
 
-from solidlsp.ls import SolidLanguageServer
-from solidlsp.ls_config import Language, LanguageServerConfig
-from solidlsp.ls_logger import LanguageServerLogger
-from solidlsp.settings import SolidLSPSettings
+from src.solidlsp.ls import SolidLanguageServer
+from src.solidlsp.ls_config import Language, LanguageServerConfig
+from src.solidlsp.ls_logger import LanguageServerLogger
+from src.solidlsp.settings import SolidLSPSettings
 
 REPO_ROOT = Path(__file__).parent.parent.absolute()
 
 if __name__ == "__main__":
-    logger = LanguageServerLogger("mql5_test", "mql5_test.log")
-    config = LanguageServerConfig(
-        code_language=Language.MQL5,
-        start_independent_lsp_process=True,
-        trace_lsp_communication=True,  # LSP通信をログに出力してデバッグしやすくする
-    )
+    logging.basicConfig(level=logging.INFO)
+    logger = logging.getLogger()
+
+    # LSPサーバーのインスタンスを作成
+    config = LanguageServerConfig(code_language=Language.MQL5)
+    ls_logger = LanguageServerLogger(logger)
     solidlsp_settings = SolidLSPSettings()
+    ls = SolidLanguageServer.create(config, ls_logger, str(REPO_ROOT), solidlsp_settings=solidlsp_settings)
 
-    # MQL5Serverインスタンスを作成
-    ls = SolidLanguageServer.create(
-        config=config,
-        logger=logger,
-        repository_root_path=str(REPO_ROOT),
-        solidlsp_settings=solidlsp_settings,
-    )
+    # 診断メッセージを格納するための辞書
+    diagnostics_captured = {}  # 最初の空でない診断をキャプチャするための辞書
+    diagnostics_event = threading.Event()
 
-    diagnostics_received = {}
-
-    # 診断メッセージを受け取るためのハンドラを定義
     def diagnostics_handler(params):
-        uri = params.get("uri", "")
-        diagnostics = params.get("diagnostics", [])
-        print(f"Received diagnostics for {uri}: {diagnostics}")
-        diagnostics_received[uri] = diagnostics
+        """LSPからの診断メッセージを処理するハンドラ"""
+        uri = params['uri']
+        diagnostics = params['diagnostics']
 
-    # LSPサーバーにハンドラを登録
-    ls.server.on_notification("textDocument/publishDiagnostics", diagnostics_handler)
+        # まだキャプチャしておらず、かつ、空でない診断情報を受け取った場合のみ処理
+        if uri not in diagnostics_captured and diagnostics:
+            print(f"Captured diagnostics for {uri}: {len(diagnostics)} items")
+            diagnostics_captured[uri] = diagnostics
+            diagnostics_event.set()  # イベントをセットして待機を解除
 
     # サーバーを起動し、テストを実行
     with ls.start_server():
+        # サーバー開始後に通知ハンドラーを登録
+        ls.server.on_notification("textDocument/publishDiagnostics", diagnostics_handler)
         print("MQL5 Language Server started.")
         test_file_path = "mql5_test_project/ExpertAdvisor_Sample.mq5"
         absolute_file_path = os.path.join(REPO_ROOT, test_file_path)
@@ -49,13 +49,20 @@ if __name__ == "__main__":
             print(f"Opened file: {test_file_path}")
             # サーバーがファイルを処理し、診断メッセージを送ってくるのを待つ
             print("Waiting for diagnostics...")
-            time.sleep(5)  # 5秒待機
+            diagnostics_event.wait(timeout=10)
 
     print("\n--- Test Results ---")
-    if file_uri in diagnostics_received:
-        print(f"Diagnostics for {test_file_path}:")
-        for diag in diagnostics_received[file_uri]:
-            print(f"  - {diag}")
+    if diagnostics_captured:
+        file_uri = Path(os.path.join(REPO_ROOT, test_file_path)).as_uri()
+        if file_uri in diagnostics_captured:
+            print(f"Diagnostics for {test_file_path}:")
+            for diag in diagnostics_captured.get(file_uri, []):
+                # 整形して出力
+                msg = diag.get('message', '').replace('\n', ' ')
+                line = diag.get('range', {}).get('start', {}).get('line', -1) + 1
+                print(f"  - [L:{line}] {msg}")
+        else:
+            print(f"No diagnostics captured for {test_file_path}.")
     else:
         print(f"No diagnostics received for {test_file_path}.")
 

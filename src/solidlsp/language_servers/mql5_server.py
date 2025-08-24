@@ -41,6 +41,8 @@ class MQL5Server(ClangdLanguageServer):
         Clones MQL5 headers and creates compile_flags.txt for clangd.
         """
         mql5_server_resources_dir = self.ls_resources_dir(solidlsp_settings, mkdir=True)
+        logger.log(f"[DEBUG] mql5_server_resources_dir: {mql5_server_resources_dir}", logging.INFO)
+
         mql5_headers_dir = os.path.join(mql5_server_resources_dir, "mql5_headers")
         mql5_repo_url = "https://github.com/khayashi4337/mql5.git"
 
@@ -60,6 +62,7 @@ class MQL5Server(ClangdLanguageServer):
         compile_flags_path = os.path.join(repository_root_path, "compile_flags.txt")
         include_path = os.path.join(mql5_headers_dir, "Include")
         include_path_posix = pathlib.Path(include_path).as_posix()
+        logger.log(f"[DEBUG] include_path_posix: {include_path_posix}", logging.INFO)
 
         flags = f"-I{include_path_posix}\n--include=Core/MQL5.mqh\n-std=c++11\n-xc++\n-Wno-write-strings"
 

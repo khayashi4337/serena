@@ -236,3 +236,6 @@ tmp/
 /test/resources/repos/swift/test_repo/.swiftpm
 
 TODO.md
+
+# MQL5 compile flags (generated with user-specific paths)
+compile_flags.txt
